@@ -26,7 +26,8 @@ void *memcpy_asm(void *dest, void const *src, size_t num) {
 
     size_t offset = (16 - reinterpret_cast<size_t>(dest) % 16) % 16;
     memcpy_simple(dest, src, offset);
-    dest += offset;
+
+    dest += offset; // FIXME: Compiler warnings here
     src += offset;
     num -= offset;
 

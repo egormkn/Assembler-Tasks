@@ -9,16 +9,25 @@ int test_memcpy(const char *mode, size_t size, size_t count) {
     int result = 0;
     if (strcmp(mode, "all") == 0) {
         result |= test_memcpy("1", size, count);
-        result |= test_memcpy("2", size, count);
-        result |= test_memcpy("4", size, count);
-        result |= test_memcpy("8", size, count);
-        result |= test_memcpy("16", size, count);
+        if (size % 2 == 0)
+            result |= test_memcpy("2", size, count);
+        if (size % 4 == 0)
+            result |= test_memcpy("4", size, count);
+        if (size % 8 == 0)
+            result |= test_memcpy("8", size, count);
+        if (size % 16 == 0)
+            result |= test_memcpy("16", size, count);
         result |= test_memcpy("1-asm", size, count);
-        result |= test_memcpy("2-asm", size, count);
-        result |= test_memcpy("4-asm", size, count);
-        result |= test_memcpy("8-asm", size, count);
-        result |= test_memcpy("nt", size, count);
-        result |= test_memcpy("nt-asm", size, count);
+        if (size % 2 == 0)
+            result |= test_memcpy("2-asm", size, count);
+        if (size % 4 == 0)
+            result |= test_memcpy("4-asm", size, count);
+        if (size % 8 == 0)
+            result |= test_memcpy("8-asm", size, count);
+        if (size % 16 == 0)
+            result |= test_memcpy("nt", size, count);
+        if (size % 16 == 0)
+            result |= test_memcpy("nt-asm", size, count);
         result |= test_memcpy("memcpy", size, count);
         result |= test_memcpy("memcpy-asm", size, count);
         return result;
@@ -95,7 +104,7 @@ int main(int argc, char *argv[]) {
 
     srand((unsigned int) time(0));
 
-    size_t size = (size_t) (1 << 28) + 1;
+    size_t size = (size_t) (1 << 28) + 8;
     size_t count = 100;
     bool aligned = false;
     const char *mode = "memcpy";
