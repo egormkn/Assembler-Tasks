@@ -5,6 +5,25 @@
 #include <getopt.h>
 #include "memcpy.h"
 
+void print_help() {
+    printf("Usage: %s [options]\n"
+                   "Options:\n"
+                   "\t%-20s\t%s\n"
+                   "\t%-20s\t%s\n"
+                   "\t%-20s\t%s\n"
+                   "\t%-20s\t%s\n"
+                   "\t%-20s\t%s\n\n"
+                   "Available modes:\n"
+                   "\tall, 1, 2, 4, 8, 16, 1-asm, 2-asm, 4-asm, 8-asm,\n"
+                   "\tnt, nt-asm, memcpy, memcpy-asm\n\n",
+           "memcpy",
+           "-h, --help", "View help",
+           "-m, --mode <mode>", "Set memcpy copy mode",
+           "-s, --size <size>", "Set array size to copy",
+           "-a, --align", "Align memory size to 16 bytes",
+           "-c, --count <count>", "Set number of tests");
+}
+
 int test_memcpy(const char *mode, size_t size, size_t count) {
     int result = 0;
     if (strcmp(mode, "all") == 0) {
@@ -107,7 +126,7 @@ int main(int argc, char *argv[]) {
     size_t size = (size_t) (1 << 28) + 8;
     size_t count = 100;
     bool aligned = false;
-    const char *mode = "memcpy";
+    const char *mode = "help";
 
     const struct option options[] = {
             {"mode",    required_argument, NULL, 'm'},
@@ -134,28 +153,18 @@ int main(int argc, char *argv[]) {
                 count = (size_t) atoi(optarg);
                 break;
             case 'h':
-                printf("Usage: %s [options]\n"
-                               "Options:\n"
-                               "\t%-20s\t%s\n"
-                               "\t%-20s\t%s\n"
-                               "\t%-20s\t%s\n"
-                               "\t%-20s\t%s\n"
-                               "\t%-20s\t%s\n\n"
-                               "Available modes:\n"
-                               "\t1, 2, 4, 8, 16, 1-asm, 2-asm, 4-asm, 8-asm,\n"
-                               "\tnt, nt-asm, memcpy, memcpy-asm\n\n",
-                       "memcpy",
-                       "-h, --help", "View help",
-                       "-m, --mode <mode>", "Set memcpy copy mode",
-                       "-s, --size <size>", "Set array size to copy",
-                       "-a, --align", "Align memory to 16 bytes",
-                       "-c, --count <count>", "Set number of tests");
+                print_help();
                 return 0;
             case '?':
             default:
                 break;
         };
     };
+
+    if (strcmp(mode, "help") == 0) {
+        print_help();
+        return 0;
+    }
 
     if (aligned) {
         size = size - size % 16;
