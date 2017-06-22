@@ -15,7 +15,7 @@ void print_help() {
                    "\t%-20s\t%s\n\n"
                    "Available modes:\n"
                    "\tall, 1, 2, 4, 8, 16, 1-asm, 2-asm, 4-asm, 8-asm,\n"
-                   "\tnt, nt-asm, memcpy, memcpy-asm\n\n",
+                   "\tnt, nt-asm, memcpy, memcpy-simple, memcpy-asm\n\n",
            "memcpy",
            "-h, --help", "View help",
            "-m, --mode <mode>", "Set memcpy copy mode",
@@ -98,6 +98,9 @@ int test_memcpy(const char *mode, size_t size, size_t count) {
     } else if (strcmp(mode, "memcpy-asm") == 0) {
         for (size_t i = 0; i != count; ++i)
             memcpy_asm(b, a, size);
+    } else if (strcmp(mode, "memcpy-simple") == 0) {
+        for (size_t i = 0; i != count; ++i)
+            memcpy_simple(b, a, size);
     } else {
         printf("unknown mode\n");
         result = -1;
@@ -123,7 +126,7 @@ int main(int argc, char *argv[]) {
 
     srand((unsigned int) time(0));
 
-    size_t size = (size_t) (1 << 28) + 8;
+    size_t size = (size_t) (1 << 28) + 7;
     size_t count = 100;
     bool aligned = false;
     const char *mode = "help";

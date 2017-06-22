@@ -27,8 +27,8 @@ void *memcpy_asm(void *dest, void const *src, size_t num) {
     size_t offset = (16 - reinterpret_cast<size_t>(dest) % 16) % 16;
     memcpy_simple(dest, src, offset);
 
-    dest += offset; // FIXME: Compiler warnings here
-    src += offset;
+    dest = (char *) dest + offset;
+    src = (char *) src + offset;
     num -= offset;
 
     size_t rest = num % 16;
@@ -51,16 +51,12 @@ void *memcpy_asm(void *dest, void const *src, size_t num) {
     : "0"(dest), "1"(src), "2"(num)
     : "memory", "cc"
     );
+
     _mm_sfence();
 
-    memcpy_simple(dest + num, src + num, rest);
+    memcpy_simple((char *) dest + num, (char *) src + num, rest);
     return result_dest;
 }
-
-
-
-
-
 
 template<typename T>
 void *element_wise_copy(void *dest, void const *src, size_t num) __attribute__((noinline));
