@@ -1,74 +1,51 @@
-#include <unistd.h>
-#include <sys/mman.h>
-#include <cstdio>
+#include <functional>
+#include <iostream>
+#include "trampoline.h"
 
-template<typename T>
-class trampoline {
+class debug_function {
 public:
-    template<typename F>
-    trampoline(F func) {}
-
-    ~trampoline() {}
-
-    T *get() const {};
-};
-
-template<typename R, typename... Args>
-class trampoline<R(Args...)> {
-public:
-    template<typename F>
-    trampoline(F const &func) {
-        func_obj = new F(func);
-        caller = &do_call<F>;
-        code = mmap(nullptr, 4096, PROT_READ | PROT_WRITE | PROT_EXEC, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
-        unsigned char *pcode = (unsigned char *) code;
-        // 4889FE          mov rsi, rdi
-        *pcode++ = 0x48;
-        *pcode++ = 0x89;
-        *pcode++ = 0xfe;
-        // 48BF            mov rdi, imm
-        *pcode++ = 0x48;
-        *pcode++ = 0xbf;
-        *(void **) pcode = func_obj;
-        pcode += sizeof(func_obj);
-        // 48B8            mov rax, imm
-        *pcode++ = 0x48;
-        *pcode++ = 0xb8;
-        *(void **) pcode = (void *) caller;
-        pcode += sizeof(caller);
-        // FFE0            jmp rax
-        *pcode++ = 0xFF;
-        *pcode++ = 0xE0;
+    debug_function() {
+        printf("Debug function <%p> created\n", this);
     }
 
-    template<typename F>
-    static R do_call(void *obj, Args ...args) {
-        return (*(F *) obj)(args...);
+    int operator()(int n) {
+        printf("Debug function <%p> called: debug_function(%d)\n", this, n);
+        return 12345;
     }
 
-    R (*get() const )(Args ...args) {
-        return (R (*)(Args ...args)) code;
+    ~debug_function() {
+        printf("Debug function <%p> deleted\n", this);
     }
-
-private:
-    void *func_obj;
-    void *code;
-
-    R (*caller)(void *obj, Args ...args);
 };
 
 int main() {
     int b = 123;
 
-    auto lambda = [&](int a) {
-        return printf("%d %d %d\n", a, b, 0);
+    std::function<int(int)> factorial = [&](int i) {
+        return (i == 1) ? 1 : i * factorial(i - 1);
     };
 
-    trampoline<int(int)> tr(lambda);
-    auto p = tr.get();
+    std::function<int(int)> sum = [&](int i) {
+        return (i == 1) ? 1 : i + sum(i - 1);
+    };
 
-    p(5);
+    std::function<int(int)> loopy = [&](int i) {
+        printf("> %d\n", i);
+        return (i == 0) ? 0 : loopy(i - 1);
+    };
 
-    b = 124;
-    p(6);
+    std::function<int(int)> print = [&](int a) {
+        return printf("%d %d\n", a, b);
+    };
+
+    debug_function fo;
+    fo(12);
+    trampoline<int(int)> tr(fo);
+
+    trampoline<int(int)>::func_ptr_t p = tr.get();
+    printf("TEST\n");
+    p(2000000000);
+    printf("TEST\n");
+    /*b = 124;
+    p(6);*/
 }
