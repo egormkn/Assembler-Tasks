@@ -12,5 +12,5 @@ set(WORDCOUNT_SOURCE_FILES wordcount.cpp wordcount.h)
 add_executable(wordcount ${WORDCOUNT_SOURCE_FILES})
 target_compile_options(wordcount PUBLIC -Wall -Werror -Wextra -mssse3)
 
-set(TRAMPOLINE_SOURCE_FILES trampoline.cpp trampoline.h trampoline_args.h)
+set(TRAMPOLINE_SOURCE_FILES trampoline.cpp trampoline.h trampoline_args.h slab.cpp slab.h asm.cpp memorystream.cpp memorystream.h)
 add_executable(trampoline ${TRAMPOLINE_SOURCE_FILES})

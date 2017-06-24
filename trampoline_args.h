@@ -1,43 +1,32 @@
 #ifndef ASSEMBLER_TRAMPOLINE_ARGS_H
 #define ASSEMBLER_TRAMPOLINE_ARGS_H
 
-template<typename T, typename... Other>
-struct trampoline_args<std::enable_if<sizeof(T) == 1, T>::type, Other...> {
-    const static int num_fractional_args = args_info<Other...>::num_fractional_args;
-    const static int num_not_fract_args = args_info<Other...>::num_not_fract_args + 1;
-    const static bool is_valid = (sizeof(T) <= 8) & args_info<Other...>::is_valid;
-};
-
-
-
-
-
-
-
-template<typename... Args>
-struct args_info;
+template<typename ...Args>
+struct trampoline_args;
 
 template<>
-struct args_info<> {
-    const static int num_fractional_args = 0;
-    const static int num_not_fract_args = 0;
-    const static bool is_valid = 1;
+struct trampoline_args<> {
+    static const int INTEGER = 0;
+    static const int SSE = 0;
 };
 
-template<typename First, typename... Other>
-struct args_info<First, Other...> {
-    const static int num_fractional_args = args_info<Other...>::num_fractional_args;
-    const static int num_not_fract_args = args_info<Other...>::num_not_fract_args + 1;
-    const static bool is_valid = (sizeof(First) <= 8) & args_info<Other...>::is_valid;
+template<typename T, typename ...Args>
+struct trampoline_args<T, Args ...> {
+    static const int INTEGER = trampoline_args<Args ...>::INTEGER + 1;
+    static const int SSE = trampoline_args<Args ...>::SSE;
+    static_assert(sizeof(T) <= 8, "Arguments larger than 8 bytes are unsupported.");
 };
 
-template<typename... Other>
-struct args_info<std::is_floating_point<T>::value, Other...> {
-    const static int num_fractional_args = args_info<Other...>::num_fractional_args + 1;
-    const static int num_not_fract_args = args_info<Other...>::num_not_fract_args;
-    const static bool is_valid = args_info<Other...>::is_valid;
+template<typename ...Args>
+struct trampoline_args<float, Args ...> {
+    static const int INTEGER = trampoline_args<Args ...>::INTEGER;
+    static const int SSE = trampoline_args<Args ...>::SSE + 1;
 };
 
+template<typename ... Args>
+struct trampoline_args<double, Args...> {
+    static const int INTEGER = trampoline_args<Args ...>::INTEGER;
+    static const int SSE = trampoline_args<Args ...>::SSE + 1;
+};
 
-
-#endif //ASSEMBLER_TRAMPOLINE_ARGS_H
+#endif // ASSEMBLER_TRAMPOLINE_ARGS_H
