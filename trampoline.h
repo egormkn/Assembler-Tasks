@@ -159,10 +159,10 @@ private:
             generator.add4(add_rsp_imm, 8);  // Set rsp to return address
 
             // loop:
-            char *loop = (char *) generator.get_ptr();
+            char *loop = (char *) generator.get_ptr(); // Make a label here
             generator.add(cmp_rax_rsp);      // Check if all arguments were shifted
             generator.add(je_imm);           // If so, go to label_2
-            char *label_2 = (char *) generator.reserve(1); // Reserve 1 byte for label
+            char *label_2 = (char *) generator.reserve(1); // Reserve 1 byte for jump offset
 
             generator.add4(add_rsp_imm, 8);            // Set rsp to next argument
             generator.add(mov_rdi_mem_rsp);            // Copy argument to rdi
@@ -181,10 +181,8 @@ private:
 
             generator.add(call_rax);  // Call the function
             generator.add(pop_r9);    // Remove 6th argument from stack because of callconv
-            generator.add4(mov_r11_mem_rsp_plus_imm, stack_size); // save into r11 address of current rsp plus shift on current stack size
-            //have one less argument in stack cause of one argument have already been deleted from stack
-
-            generator.add(mov_mem_rsp_r11); // set correct value, previously stored in r11, to rsp
+            generator.add4(mov_r11_mem_rsp_plus_imm, stack_size); // Put correct stack size to r11
+            generator.add(mov_mem_rsp_r11); // Restore rsp value
             generator.add(ret); // Return
         }
     }
