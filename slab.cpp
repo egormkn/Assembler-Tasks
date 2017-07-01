@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <sys/mman.h>
+#include <exception>
 #include "slab.h"
 
 void **slab::current = nullptr;
@@ -21,14 +22,14 @@ void slab::free(void *ptr) {
 }
 
 void slab::allocate() {
-    void *memory = mmap(nullptr, 4096, PROT_EXEC | PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+    void *memory = mmap(nullptr, PAGE_SIZE * PAGE_AMOUNT, PROT_EXEC | PROT_READ | PROT_WRITE,
+                        MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
     current = (void **) memory;
-    if (memory != nullptr) {
-        for (auto i = 0; i < 4096; i += SIZE) {
-            auto temp = static_cast<char *>(memory) + i;
-            *(void **) temp = 0;
-            if (i != 0)
-                *(void **) (temp - SIZE) = temp;
+    for (int i = 0; i < PAGE_SIZE * PAGE_AMOUNT; i += SIZE) {
+        char *temp = static_cast<char *>(memory) + i;
+        *(void **) temp = 0;
+        if (i != 0) {
+            *(void **) (temp - SIZE) = temp;
         }
     }
 }

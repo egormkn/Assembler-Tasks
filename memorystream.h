@@ -2,6 +2,7 @@
 #define MEMORYSTREAM_H
 
 #include <cstdint>
+#include <cstddef>
 
 class memorystream {
 public:
@@ -13,6 +14,12 @@ public:
         }
         return stream;
     }*/
+
+    void *reserve(size_t size) {
+        void *start = ptr;
+        ptr += size;
+        return start;
+    }
 
     void add(const char *operation) {
         for (const char *i = operation; *i; ++i) {
@@ -30,6 +37,12 @@ public:
         add(operation);
         *(int32_t *) ptr = data;
         ptr += 4;
+    }
+
+    void add1(const char *operation, int8_t data) {
+        add(operation);
+        *(int8_t *) ptr = data;
+        ptr += 1;
     }
 
     void *get() const {

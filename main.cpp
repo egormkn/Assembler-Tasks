@@ -1,7 +1,7 @@
 #include <iostream>
 #include <cstdio>
 #include <vector>
-#include "trampoline2.h"
+#include "trampoline.h"
 
 using namespace std;
 
